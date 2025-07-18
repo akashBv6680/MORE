@@ -24,38 +24,42 @@ from sklearn.naive_bayes import GaussianNB, MultinomialNB, ComplementNB
 from imblearn.over_sampling import SMOTE
 import xgboost as xgb
 
+from langchain.llms import Together
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+
 # === Together AI ===
-together_api_key = "your_together_api_key_here"
+together_api_key = "tgp_v1_ecSsk1__FlO2mB_gAaaP2i-Affa6Dv8OCVngkWzBJUY"
 
 client_email = st.sidebar.text_input("Enter Client Email")
 
 # === AI Prompt Functions ===
-def ask_data_scientist_agent(prompt):
+def ask_agent(prompt, model):
     response = requests.post(
         "https://api.together.xyz/v1/chat/completions",
         headers={"Authorization": f"Bearer {together_api_key}"},
         json={
-            "model": "mistralai/Mistral-7B-Instruct-v0.1",
-            "messages": [{"role": "user", "content": f"[DATA SCIENTIST] {prompt}"}],
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
         }
     )
     if response.status_code == 200:
         return response.json()["choices"][0]["message"]["content"]
     return f"Error: {response.text}"
 
+def ask_data_scientist_agent(prompt):
+    return ask_agent(f"[DATA SCIENTIST] {prompt}", "mistralai/Mistral-7B-Instruct-v0.1")
 
 def ask_ml_engineer_agent(prompt):
-    response = requests.post(
-        "https://api.together.xyz/v1/chat/completions",
-        headers={"Authorization": f"Bearer {together_api_key}"},
-        json={
-            "model": "mistralai/Mistral-7B-Instruct-v0.1",
-            "messages": [{"role": "user", "content": f"[ML ENGINEER] {prompt}"}],
-        }
+    return ask_agent(f"[ML ENGINEER] {prompt}", "mistralai/Mistral-7B-Instruct-v0.1")
+
+def ask_langchain_agent(prompt):
+    llm = Together(model="mistralai/Mixtral-8x7B-Instruct-v0.1", api_key=together_api_key)
+    chain = LLMChain(
+        llm=llm,
+        prompt=PromptTemplate(input_variables=["query"], template="You are a smart agent. {query}")
     )
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
-    return f"Error: {response.text}"
+    return chain.run(prompt)
 
 # === Email Notification ===
 def send_email_report(subject, body, to, attachment_path=None):
