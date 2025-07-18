@@ -29,15 +29,18 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
 # === Together AI ===
-together_api_key = "tgp_v1_ecSsk1__FlO2mB_gAaaP2i-Affa6Dv8OCVngkWzBJUY"
+together_api_keys = [
+    "tgp_v1_ecSsk1__FlO2mB_gAaaP2i-Affa6Dv8OCVngkWzBJUY",
+    "tgp_v1_4hJBRX0XDlwnw_hhUnhP0e_lpI-u92Xhnqny2QIDAIM"
+]
 
 client_email = st.sidebar.text_input("Enter Client Email")
 
 # === AI Prompt Functions ===
-def ask_agent(prompt, model):
+def ask_agent(prompt, model, key=0):
     response = requests.post(
         "https://api.together.xyz/v1/chat/completions",
-        headers={"Authorization": f"Bearer {together_api_key}"},
+        headers={"Authorization": f"Bearer {together_api_keys[key]}"},
         json={
             "model": model,
             "messages": [{"role": "user", "content": prompt}],
@@ -48,13 +51,13 @@ def ask_agent(prompt, model):
     return f"Error: {response.text}"
 
 def ask_data_scientist_agent(prompt):
-    return ask_agent(f"[DATA SCIENTIST] {prompt}", "mistralai/Mistral-7B-Instruct-v0.1")
+    return ask_agent(f"[DATA SCIENTIST] {prompt}", "mistralai/Mistral-7B-Instruct-v0.1", key=0)
 
 def ask_ml_engineer_agent(prompt):
-    return ask_agent(f"[ML ENGINEER] {prompt}", "mistralai/Mistral-7B-Instruct-v0.1")
+    return ask_agent(f"[ML ENGINEER] {prompt}", "mistralai/Mistral-7B-Instruct-v0.1", key=1)
 
 def ask_langchain_agent(prompt):
-    llm = Together(model="mistralai/Mixtral-8x7B-Instruct-v0.1", api_key=together_api_key)
+    llm = Together(model="mistralai/Mixtral-8x7B-Instruct-v0.1", api_key=together_api_keys[0])
     chain = LLMChain(
         llm=llm,
         prompt=PromptTemplate(input_variables=["query"], template="You are a smart agent. {query}")
