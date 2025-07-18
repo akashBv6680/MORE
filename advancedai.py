@@ -24,7 +24,7 @@ from sklearn.naive_bayes import GaussianNB, MultinomialNB, ComplementNB
 from imblearn.over_sampling import SMOTE
 import xgboost as xgb
 
-from langchain.llms import Together
+from langchain_community.llms import Together
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
