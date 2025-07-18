@@ -67,7 +67,7 @@ def ask_langchain_agent(prompt):
 def send_email_report(subject, body, to, attachment_path=None):
     msg = EmailMessage()
     msg['Subject'] = subject
-    msg['From'] = st.secrets.toml["EMAIL_ADDRESS"]
+    msg['From'] = st.secrets["EMAIL_ADDRESS"]
     msg['To'] = to
     msg.set_content(body)
 
@@ -77,9 +77,9 @@ def send_email_report(subject, body, to, attachment_path=None):
         msg.add_attachment(img_data, maintype='image', subtype='png', filename='visual.png')
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-        smtp.login(st.secrets.toml["EMAIL_ADDRESS"], st.secrets.toml["EMAIL_PASSWORD"])
+        smtp.login(st.secrets["EMAIL_ADDRESS"], st.secrets["EMAIL_PASSWORD"])
         smtp.send_message(msg)
-        msg['From'] = st.secrets.toml["EMAIL_ADDRESS"]
+        msg['From'] = st.secrets["EMAIL_ADDRESS"]
 # === Agent Class ===
 class AutoMLAgent:
     def __init__(self, X, y):
